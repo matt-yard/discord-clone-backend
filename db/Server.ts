@@ -16,9 +16,9 @@ export async function createServer(
 // read server
 export async function getServerById(
   serverId: string
-): Promise<(Server & ServerAdditionalInfo) | null> {
-  const server: (Server & ServerAdditionalInfo) | null =
-    await prisma.server.findFirst({
+): Promise<(Server & ServerAllInfo) | null> {
+  const server: (Server & ServerAllInfo) | null = await prisma.server.findFirst(
+    {
       where: { id: serverId },
       include: {
         members: {
@@ -35,7 +35,8 @@ export async function getServerById(
         },
         channels: true,
       },
-    });
+    }
+  );
 
   return server;
 }
@@ -54,6 +55,40 @@ export async function updateServer(
   });
 
   return updatedServer;
+}
+
+// adding members to the server
+
+export async function addMemberToServer(
+  userId: string,
+  serverId: string
+): Promise<void> {
+  await prisma.server.update({
+    where: {
+      id: serverId,
+    },
+    data: {
+      members: {
+        create: [{ userId: userId }],
+      },
+    },
+  });
+}
+
+export async function removeMemberFromServer(
+  userId: string,
+  serverId: string
+): Promise<void> {
+  await prisma.server.update({
+    where: {
+      id: serverId,
+    },
+    data: {
+      members: {
+        delete: [{ userId_serverId: { userId: userId, serverId: serverId } }],
+      },
+    },
+  });
 }
 
 // delete server

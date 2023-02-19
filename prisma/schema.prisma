@@ -18,6 +18,7 @@ model Message {
   createdAt DateTime @default(now())
   channelId String @db.ObjectId
   channel Channel @relation(fields: [channelId],references: [id])
+  wasUpdated Boolean @default(false)
 }
 
 

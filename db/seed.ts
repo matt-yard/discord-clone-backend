@@ -2,6 +2,7 @@ import { Channel, Server, User, Prisma } from "@prisma/client";
 import { createUser, updateUser, deleteUser, changeUserPassword } from "./User";
 
 import prisma from "./index";
+import { addMemberToServer, removeMemberFromServer } from "./Server";
 
 async function main(): Promise<void> {
   await prisma.$connect();
@@ -193,16 +194,18 @@ async function seed(): Promise<void> {
   console.log("created User: ", createdUser);
   //adding user to a server to test if delete also takes them out:
 
-  await prisma.server.update({
-    where: {
-      id: "63f27d64e1f25d86f9912ca1",
-    },
-    data: {
-      members: {
-        create: [{ userId: createdUser.id }],
-      },
-    },
-  });
+  await addMemberToServer(createdUser.id, "63f27d64e1f25d86f9912ca1");
+
+  // await prisma.server.update({
+  //   where: {
+  //     id: "63f27d64e1f25d86f9912ca1",
+  //   },
+  //   data: {
+  //     members: {
+  //       create: [{ userId: createdUser.id }],
+  //     },
+  //   },
+  // });
 
   console.log("updating user...");
   const updateFields: UserUpdateFields = {
@@ -221,12 +224,21 @@ async function seed(): Promise<void> {
   );
   console.log("user after changing password: ", newPasswordUser);
 
-  console.log("deleting user...");
-  const deletedUser: User = await deleteUser(createdUser.id);
+  // console.log("deleting user...");
+  // const deletedUser: User = await deleteUser(createdUser.id);
 
-  console.log("return value from delete user function: ", deletedUser);
+  // console.log("return value from delete user function: ", deletedUser);
 }
 
 // main();
 
-seed();
+async function test(): Promise<void> {
+  await removeMemberFromServer(
+    "63f29b057bb54cf807dfde97",
+    "63f27d64e1f25d86f9912ca1"
+  );
+  console.log("member removed");
+}
+
+// seed();
+test();

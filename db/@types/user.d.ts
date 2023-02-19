@@ -11,7 +11,7 @@ interface UserCreateFields {
   profileImage?: string;
 }
 
-interface UserEssentialInfo {
+interface UserPublicInfo {
   username: string;
   id: string;
   createdAt: Date;

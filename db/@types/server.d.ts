@@ -3,7 +3,7 @@ interface ServerCreateFields {
   serverImage?: string;
 }
 
-interface ServerAdditionalInfo {
+interface ServerAllInfo {
   channels: Channel[];
   members: Member & {
     user: {

@@ -17,9 +17,9 @@ export async function createUser(newUser: UserCreateFields): Promise<User> {
 
 // getUserForLogin returns the password so that it can be verified by the API on login
 // return value of this function should NEVER be sent to the frontend by the API
-export async function getUserForLogin(userId: string): Promise<User | null> {
+export async function getUserForLogin(username: string): Promise<User | null> {
   const user: User | null = await prisma.user.findFirst({
-    where: { id: userId },
+    where: { username: username },
   });
 
   return user;
@@ -28,8 +28,8 @@ export async function getUserForLogin(userId: string): Promise<User | null> {
 // getById and getByUsername will only return public info about the user
 export async function getUserById(
   userId: string
-): Promise<UserEssentialInfo | null> {
-  const user: UserEssentialInfo | null = await prisma.user.findFirst({
+): Promise<UserPublicInfo | null> {
+  const user: UserPublicInfo | null = await prisma.user.findFirst({
     where: {
       id: userId,
     },
@@ -46,8 +46,8 @@ export async function getUserById(
 
 export async function getUserByUsername(
   username: string
-): Promise<UserEssentialInfo | null> {
-  const user: UserEssentialInfo | null = await prisma.user.findFirst({
+): Promise<UserPublicInfo | null> {
+  const user: UserPublicInfo | null = await prisma.user.findFirst({
     where: {
       username: username,
     },

@@ -1,0 +1,76 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id Int @id@default(autoincrement())
+  username String @unique
+  email String @unique
+  password String
+  created_at DateTime @default(now())
+  profile_img String
+  servers ServerMember[]
+  messages Message[]
+}
+
+model Message {
+  id Int @id@default(autoincrement())
+  author User @relation(fields: [author_id], references: [id])
+  author_id Int
+  content String
+  created_at DateTime @default(now())
+}
+
+model Channel {
+  id Int @id@default(autoincrement())
+  server Server @relation(fields: [server_id], references: [id])
+  server_id Int
+  type String
+}
+
+model Server {
+  id Int @id@default(autoincrement())
+  name String
+  channels Channel[]
+  image String
+  created_at DateTime @default(now())
+  members ServerMember[]
+  roles Role[]
+}
+
+model ServerMember {
+  id Int @id @default(autoincrement())
+  user User @relation(fields: [user_id], references: [id])
+  user_id Int
+  server Server @relation(fields: [server_id], references: [id])
+  server_id Int
+  joined_at DateTime @default(now())
+  roles ServerMemberRole[]
+}
+
+model Role {
+  id Int @id@default(autoincrement())
+  server_id Int
+  server Server @relation(fields: [server_id], references: [id])
+  name String
+  can_kick_member Boolean
+  can_create_channel Boolean
+  members ServerMemberRole[]
+}
+
+model ServerMemberRole {
+  role_id Int
+  role Role @relation(fields: [role_id], references: [id])
+  server_member_id Int
+  server_member ServerMember @relation(fields: [server_member_id], references: [id])
+
+  @@id([role_id, server_member_id])
+}

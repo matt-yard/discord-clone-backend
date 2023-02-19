@@ -30,6 +30,7 @@ model User {
   servers Member[]
   messages Message[]
   profileImage String @default("none")
+  createdAt DateTime @default(now())
 }
 
 model Server {

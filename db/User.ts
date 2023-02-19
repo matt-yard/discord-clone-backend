@@ -2,7 +2,7 @@ import { User } from "@prisma/client";
 import bcrypt from "bcrypt";
 import prisma from "./index";
 
-//Creating user
+//create user
 export async function createUser(newUser: UserCreateFields): Promise<User> {
   const hashedPassword = await bcrypt.hash(newUser.password, 10);
 
@@ -13,12 +13,79 @@ export async function createUser(newUser: UserCreateFields): Promise<User> {
   return createdUser;
 }
 
-//Deleting user
+// read user
 
-export async function deleteUser(userId: string): Promise<User> {
-  const deletedUser: User = await prisma.user.delete({ where: { id: userId } });
+// getUserForLogin returns the password so that it can be verified by the API on login
+// return value of this function should NEVER be sent to the frontend by the API
+export async function getUserForLogin(userId: string): Promise<User | null> {
+  const user: User | null = await prisma.user.findFirst({
+    where: { id: userId },
+  });
 
-  return deletedUser;
+  return user;
+}
+
+// getById and getByUsername will only return public info about the user
+export async function getUserById(
+  userId: string
+): Promise<UserEssentialInfo | null> {
+  const user: UserEssentialInfo | null = await prisma.user.findFirst({
+    where: {
+      id: userId,
+    },
+    select: {
+      id: true,
+      username: true,
+      profileImage: true,
+      createdAt: true,
+    },
+  });
+
+  return user;
+}
+
+export async function getUserByUsername(
+  username: string
+): Promise<UserEssentialInfo | null> {
+  const user: UserEssentialInfo | null = await prisma.user.findFirst({
+    where: {
+      username: username,
+    },
+    select: {
+      id: true,
+      username: true,
+      profileImage: true,
+      createdAt: true,
+    },
+  });
+
+  return user;
+}
+
+// get me
+// Separate function to be used to get current user. this will include information about what
+// servers the user is a member of, and should be protected on the API side, so that it is only
+// ever called with the verified current user
+export async function getMe(userId: string): Promise<UserAllInfo | null> {
+  const me: UserAllInfo | null = await prisma.user.findFirst({
+    where: {
+      id: userId,
+    },
+    select: {
+      username: true,
+      id: true,
+      email: true,
+      createdAt: true,
+      profileImage: true,
+      servers: {
+        include: {
+          server: true,
+        },
+      },
+    },
+  });
+
+  return me;
 }
 
 //updating user
@@ -53,4 +120,12 @@ export async function changeUserPassword(
   });
 
   return updatedUser;
+}
+
+//Deleting user
+
+export async function deleteUser(userId: string): Promise<User> {
+  const deletedUser: User = await prisma.user.delete({ where: { id: userId } });
+
+  return deletedUser;
 }

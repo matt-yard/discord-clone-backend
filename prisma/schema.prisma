@@ -6,71 +6,68 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "mongodb"
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id Int @id@default(autoincrement())
-  username String @unique
-  email String @unique
-  password String
-  created_at DateTime @default(now())
-  profile_img String
-  servers ServerMember[]
-  messages Message[]
-}
-
 model Message {
-  id Int @id@default(autoincrement())
-  author User @relation(fields: [author_id], references: [id])
-  author_id Int
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  authorId String @db.ObjectId
+  author User @relation(fields: [authorId], references: [id], onDelete: Cascade)
   content String
-  created_at DateTime @default(now())
+  createdAt DateTime @default(now())
+  channelId String @db.ObjectId
+  channel Channel @relation(fields: [channelId],references: [id])
 }
 
-model Channel {
-  id Int @id@default(autoincrement())
-  server Server @relation(fields: [server_id], references: [id])
-  server_id Int
-  type String
+
+model User {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  username String @unique
+  password String
+  email String @unique
+  serverIds String[] @db.ObjectId
+  servers Member[]
+  messages Message[]
+  profileImage String @default("none")
 }
 
 model Server {
-  id Int @id@default(autoincrement())
+  id String @id @default(auto()) @map("_id") @db.ObjectId
   name String
   channels Channel[]
-  image String
-  created_at DateTime @default(now())
-  members ServerMember[]
-  roles Role[]
+  memberIds String[] @db.ObjectId
+  members Member[]
+  serverImage String @default("none")
 }
 
-model ServerMember {
-  id Int @id @default(autoincrement())
-  user User @relation(fields: [user_id], references: [id])
-  user_id Int
-  server Server @relation(fields: [server_id], references: [id])
-  server_id Int
-  joined_at DateTime @default(now())
-  roles ServerMemberRole[]
+model Member {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  userId String @db.ObjectId
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  server Server @relation(fields: [serverId], references: [id], onDelete: Cascade)
+  serverId String @db.ObjectId
+  joinedDate DateTime @default(now())
+  roleIds String[] @db.ObjectId
+  roles Role[] @relation(fields: [roleIds], references: [id])
+
+  @@unique([userId, serverId])
 }
 
 model Role {
-  id Int @id@default(autoincrement())
-  server_id Int
-  server Server @relation(fields: [server_id], references: [id])
+  id String @id @default(auto()) @map("_id") @db.ObjectId
   name String
-  can_kick_member Boolean
-  can_create_channel Boolean
-  members ServerMemberRole[]
+  memberIds String[] @db.ObjectId
+  members Member[] @relation(fields: [memberIds], references: [id])
 }
 
-model ServerMemberRole {
-  role_id Int
-  role Role @relation(fields: [role_id], references: [id])
-  server_member_id Int
-  server_member ServerMember @relation(fields: [server_member_id], references: [id])
-
-  @@id([role_id, server_member_id])
+model Channel {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  name String
+  type String
+  serverId String @db.ObjectId
+  server Server @relation(fields: [serverId], references: [id], onDelete: Cascade)
+  messages Message[]
 }
+
+

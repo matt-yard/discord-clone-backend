@@ -1,1 +1,5 @@
-// index for DB
+// index for DB\
+import { PrismaClient } from "@prisma/client";
+const prisma: PrismaClient = new PrismaClient();
+
+export default prisma;

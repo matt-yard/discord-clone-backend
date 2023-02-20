@@ -18,6 +18,21 @@ app.use(morgan("dev"));
 
 app.use("/api", apiRouter);
 
+// Error handling
+
+app.use(
+  (err: ResponseError, req: Request, res: Response, next: NextFunction) => {
+    res.status(err.status || 500);
+    res.send({
+      ok: false,
+      error: {
+        message: err.message,
+        status: err.status || 500,
+      },
+    });
+  }
+);
+
 const PORT = process.env.PORT;
 
 app.listen(PORT, () => {

@@ -85,7 +85,7 @@ export async function removeMemberFromServer(
     },
     data: {
       members: {
-        delete: [{ userId_serverId: { userId: userId, serverId: serverId } }],
+        delete: [{ userId_serverId: { userId, serverId } }],
       },
     },
   });

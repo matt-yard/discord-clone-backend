@@ -1,5 +1,11 @@
 import { Channel, Server, User, Prisma } from "@prisma/client";
-import { createUser, updateUser, deleteUser, changeUserPassword } from "./User";
+import {
+  createUser,
+  updateUser,
+  deleteUser,
+  changeUserPassword,
+  getUserByEmail,
+} from "./User";
 
 import prisma from "./index";
 import { addMemberToServer, removeMemberFromServer } from "./Server";
@@ -194,7 +200,7 @@ async function seed(): Promise<void> {
   console.log("created User: ", createdUser);
   //adding user to a server to test if delete also takes them out:
 
-  await addMemberToServer(createdUser.id, "63f27d64e1f25d86f9912ca1");
+  // await addMemberToServer(createdUser.id, "63f2b771456e3126204a62f2");
 
   // await prisma.server.update({
   //   where: {
@@ -233,11 +239,8 @@ async function seed(): Promise<void> {
 // main();
 
 async function test(): Promise<void> {
-  await removeMemberFromServer(
-    "63f29b057bb54cf807dfde97",
-    "63f27d64e1f25d86f9912ca1"
-  );
-  console.log("member removed");
+  const user: UserPublicInfo | null = await getUserByEmail("test@mail.com");
+  console.log(user);
 }
 
 // seed();

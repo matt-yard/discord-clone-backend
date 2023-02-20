@@ -70,7 +70,10 @@ async function main(): Promise<void> {
       },
       data: {
         members: {
-          create: [{ userId: newUser.id }, { userId: newUser2.id }],
+          create: [
+            { userId: newUser.id, isOwner: true },
+            { userId: newUser2.id },
+          ],
         },
       },
     });
@@ -236,12 +239,16 @@ async function seed(): Promise<void> {
   // console.log("return value from delete user function: ", deletedUser);
 }
 
-// main();
-
 async function test(): Promise<void> {
-  const user: UserPublicInfo | null = await getUserByEmail("test@mail.com");
-  console.log(user);
+  await prisma.server.delete({
+    where: {
+      id: "63f3d7cb2f71da0db74e6666",
+    },
+  });
+
+  console.log("deleted...");
 }
 
+// main();
 // seed();
 test();

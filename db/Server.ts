@@ -1,5 +1,5 @@
 import prisma from "./index";
-import { Server } from "@prisma/client";
+import { Member, Server } from "@prisma/client";
 
 // create server
 
@@ -101,4 +101,33 @@ export async function deleteServer(serverId: string): Promise<Server> {
   });
 
   return deletedServer;
+}
+
+// check if a user belongs to server
+
+export async function userIsMember(
+  userId: string,
+  serverId: string
+): Promise<boolean> {
+  const member: Member | null = await prisma.member.findFirst({
+    where: {
+      userId: userId,
+      serverId: serverId,
+    },
+  });
+
+  return !!member;
+}
+
+// select server owner
+
+export async function getServerOwner(serverId: string): Promise<Member | null> {
+  const member: Member | null = await prisma.member.findFirst({
+    where: {
+      serverId: serverId,
+      isOwner: true,
+    },
+  });
+
+  return member;
 }

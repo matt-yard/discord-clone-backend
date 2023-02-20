@@ -23,4 +23,7 @@ channelRouter.get(
 // will need function to determine if the user sending a message, is
 // a member of the server
 
+//UPDATE -> may not need a post route for sending messages, since it will be done
+// via websockets
+
 export default channelRouter;

@@ -1,5 +1,11 @@
 import { Request, Response, NextFunction } from "express";
-import { getUserByEmail, getUserByUsername } from "../../db/User";
+import {
+  getUserByEmail,
+  getUserByUsername,
+  getUserForLogin,
+} from "../../db/User";
+import { User } from "@prisma/client";
+import bcrypt from "bcrypt";
 
 export async function validateRegister(
   req: Request,
@@ -53,6 +59,42 @@ export async function validateRegister(
       throw err;
     }
 
+    next();
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function validateLogin(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const { email, password } = req.body;
+    const user: User | null = await getUserForLogin(email);
+
+    if (!email || !password) {
+      const err: ResponseError = new Error(
+        "Please enter a valid username and password."
+      );
+      err.status = 400;
+      throw err;
+    }
+
+    if (!user) {
+      const err: ResponseError = new Error("Invalid username or password.");
+      err.status = 422;
+      throw err;
+    }
+
+    const validPassword = await bcrypt.compare(password, user.password);
+
+    if (!validPassword) {
+      const err: ResponseError = new Error("Invalid username or password.");
+      err.status = 422;
+      throw err;
+    }
     next();
   } catch (error) {
     next(error);

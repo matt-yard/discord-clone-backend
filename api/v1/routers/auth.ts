@@ -1,15 +1,10 @@
 import { User } from "@prisma/client";
 import express, { Router, Request, Response, NextFunction } from "express";
-import {
-  createUser,
-  getMe,
-  getUserByEmail,
-  getUserByUsername,
-  getUserForLogin,
-} from "../../../db/User";
-import { validateRegister } from "../../util/errorHandlers";
-import bcrypt from "bcrypt";
+import { createUser, getMe, getUserForLogin } from "../../../db/User";
+import { validateRegister, validateLogin } from "../../util/errorHandlers";
+
 import * as jwt from "jsonwebtoken";
+import { requireUser } from "../../util/requireUser";
 
 const authRotuer: Router = express.Router();
 
@@ -48,49 +43,30 @@ authRotuer.post(
 
 authRotuer.post(
   "/login",
+  validateLogin,
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { email, password } = req.body;
-
-      if (!email || !password) {
-        const err: ResponseError = new Error(
-          "Please enter a valid username and password."
-        );
-        err.status = 400;
-        throw err;
-      }
-
       const user: User | null = await getUserForLogin(email);
-      if (!user) {
-        const err: ResponseError = new Error("Invalid username or password.");
-        err.status = 422;
-        throw err;
-      }
-
-      const validPassword = await bcrypt.compare(password, user.password);
-
-      if (!validPassword) {
-        const err: ResponseError = new Error("Invalid username or password.");
-        err.status = 422;
-        throw err;
-      }
 
       const SECRET_KEY: jwt.Secret = `${process.env.JWT_SECRET}`;
 
-      const userInfo: UserAllInfo | null = await getMe(user.id);
+      if (user) {
+        const userInfo: UserAllInfo | null = await getMe(user.id);
 
-      const access_token = jwt.sign({ userId: user.id }, SECRET_KEY);
+        const access_token = jwt.sign(user.id, SECRET_KEY);
 
-      res.cookie("access_token", access_token, {
-        httpOnly: true,
-        sameSite: "strict",
-        secure: true,
-      });
+        res.cookie("access_token", access_token, {
+          httpOnly: true,
+          sameSite: "strict",
+          secure: true,
+        });
 
-      res.send({
-        ok: true,
-        user: userInfo,
-      });
+        res.send({
+          ok: true,
+          user: userInfo,
+        });
+      }
     } catch (error) {
       next(error);
     }
@@ -110,6 +86,20 @@ authRotuer.get(
 );
 
 // GET /api/v1/auth/me -> requireUser
+
+authRotuer.get(
+  "/me",
+  requireUser,
+  async (req: Request, res: Response, next: NextFunction) => {
+    if (req.user) {
+      const me: UserAllInfo | null = await getMe(req.user.id);
+      res.send({
+        ok: true,
+        user: me,
+      });
+    }
+  }
+);
 
 // DELETE /api/auth/v1/me -> requireUser
 

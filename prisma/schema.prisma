@@ -17,7 +17,7 @@ model Message {
   content String
   createdAt DateTime @default(now())
   channelId String @db.ObjectId
-  channel Channel @relation(fields: [channelId],references: [id])
+  channel Channel @relation(fields: [channelId],references: [id], onDelete: Cascade)
   wasUpdated Boolean @default(false)
 }
 
@@ -52,6 +52,7 @@ model Member {
   joinedDate DateTime @default(now())
   roleIds String[] @db.ObjectId
   roles Role[] @relation(fields: [roleIds], references: [id])
+  isOwner Boolean @default(false)
 
   @@unique([userId, serverId])
 }

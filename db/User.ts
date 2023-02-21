@@ -47,7 +47,7 @@ export async function getUserById(
 export async function getUserByUsername(
   username: string
 ): Promise<UserPublicInfo | null> {
-  const user: UserPublicInfo | null = await prisma.user.findFirst({
+  const user: UserPublicInfo | null = await prisma.user.findUnique({
     where: {
       username: username,
     },

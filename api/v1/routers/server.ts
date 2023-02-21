@@ -2,11 +2,15 @@ import { Server } from "@prisma/client";
 import express, { Router, Request, Response, NextFunction } from "express";
 import { createChannel } from "../../../db/Channel";
 import {
+  addMemberByUsername,
+  addMemberToServer,
   createNewServer,
   deleteServer,
   getServerById,
   updateServer,
+  userIsMember,
 } from "../../../db/Server";
+import { getUserByUsername } from "../../../db/User";
 import {
   requireAcces,
   requireOwner,
@@ -26,10 +30,10 @@ serverRouter.get(
   }
 );
 
-//POST /api/v1/servers -> requireUser
+//POST /api/v1/server -> requireUser
 
 serverRouter.post(
-  "/servers",
+  "/",
   requireUser,
   async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -43,13 +47,12 @@ serverRouter.post(
       if (req.user) {
         const newServerFields: ServerCreateFields = {
           name: name,
-          ownerId: req.user?.id,
         };
         if (serverImage) {
           newServerFields.serverImage = serverImage;
         }
 
-        const newServer = await createNewServer(newServerFields);
+        const newServer = await createNewServer(newServerFields, req.user.id);
         res.send({
           ok: true,
           server: newServer,
@@ -158,6 +161,51 @@ serverRouter.post(
         ok: true,
         channel: newChannel,
       });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+serverRouter.post(
+  "/:serverId/add-member",
+  requireUser,
+  requireOwner,
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { username } = req.body;
+      console.log("username", username);
+      if (!username) {
+        const err: ResponseError = new Error("Must provide a username");
+        err.status = 400;
+        throw err;
+      }
+      const userToAdd: UserPublicInfo | null = await getUserByUsername(
+        username
+      );
+
+      console.log("user to add", userToAdd);
+      if (!userToAdd) {
+        const err: ResponseError = new Error("Could not find user");
+        err.status = 404;
+        throw err;
+      } else {
+        const isMember = await userIsMember(userToAdd.id, req.params.serverId);
+
+        console.log("ismember, ", isMember);
+        if (isMember) {
+          res.send({
+            ok: true,
+            message: "User already belongs to the server.",
+          });
+        } else {
+          await addMemberToServer(userToAdd.id, req.params.serverId);
+          res.send({
+            ok: true,
+            message: "User has been added!",
+          });
+        }
+      }
     } catch (error) {
       next(error);
     }

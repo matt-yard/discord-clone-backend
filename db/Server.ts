@@ -4,10 +4,18 @@ import { Member, Server } from "@prisma/client";
 // create server
 
 export async function createNewServer(
-  newServer: ServerCreateFields
+  newServer: ServerCreateFields,
+  ownerId: string
 ): Promise<Server> {
   const createdServer = await prisma.server.create({
     data: newServer,
+  });
+  const owner = await prisma.member.create({
+    data: {
+      serverId: createdServer.id,
+      userId: ownerId,
+      isOwner: true,
+    },
   });
 
   return createdServer;
@@ -75,6 +83,30 @@ export async function addMemberToServer(
   });
 }
 
+export async function addMemberByUsername(
+  username: string,
+  serverId: string
+): Promise<void> {
+  const memberToAdd = await prisma.user.findFirst({
+    where: {
+      username: username,
+    },
+  });
+
+  if (memberToAdd) {
+    await prisma.server.update({
+      where: {
+        id: serverId,
+      },
+      data: {
+        members: {
+          create: [{ userId: memberToAdd.id }],
+        },
+      },
+    });
+  }
+}
+
 export async function removeMemberFromServer(
   userId: string,
   serverId: string
@@ -115,8 +147,10 @@ export async function userIsMember(
       serverId: serverId,
     },
   });
+  console.log(member);
+  let isMember = member !== null;
 
-  return !!member;
+  return isMember;
 }
 
 // select server owner

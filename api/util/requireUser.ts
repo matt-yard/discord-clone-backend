@@ -27,6 +27,7 @@ export async function requireUser(
     console.log(typeof data);
 
     const user = await getUserById(data);
+    console.log("user, ", user);
     req.user = user;
     next();
   } catch (error) {
@@ -69,18 +70,18 @@ export async function requireAcces(
       throw err;
     }
 
-    if (req.user) {
+    if (req.user?.id) {
       const hasAccess = await userIsMember(req.user.id, req.params.serverId);
       if (hasAccess) {
-        return next();
+        next();
+      } else {
+        const err: ResponseError = new Error(
+          "You must belong to this server to access it."
+        );
+        err.status = 403;
+        throw err;
       }
     }
-
-    const err: ResponseError = new Error(
-      "You must belong to this server to access it."
-    );
-    err.status = 403;
-    throw err;
   } catch (error) {
     next(error);
   }
@@ -124,17 +125,20 @@ export async function requireOwner(
 
     if (req.user) {
       const owner = await getServerOwner(req.params.serverId);
+      // console.log("the owner?", owner);
       if (owner) {
         if (owner.userId == req.user.id) {
+          console.log("they matching?");
           next();
+        } else {
+          const err: ResponseError = new Error(
+            "You dont have permission to do that."
+          );
+          err.status = 403;
+          throw err;
         }
       }
     }
-    const err: ResponseError = new Error(
-      "You must belong to this server to access it."
-    );
-    err.status = 403;
-    throw err;
   } catch (error) {
     next(error);
   }

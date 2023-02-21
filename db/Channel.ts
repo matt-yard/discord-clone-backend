@@ -15,6 +15,24 @@ export async function createChannel(
 
 //read channel
 
+// get serverby channel id
+
+export async function getServerByChannelId(
+  channelId: string
+): Promise<string | null> {
+  const channel: Channel | null = await prisma.channel.findFirst({
+    where: {
+      id: channelId,
+    },
+  });
+
+  if (channel) {
+    return channel.serverId;
+  }
+
+  return null;
+}
+
 export async function getChannelById(
   channelId: string
 ): Promise<ChannelWithMessages | null> {

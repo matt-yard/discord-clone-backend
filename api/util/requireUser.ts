@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import * as jwt from "jsonwebtoken";
-import { getServerOwner, userIsMember } from "../../db/Server";
+import { getChannelById, getServerByChannelId } from "../../db/Channel";
+import { getServerById, getServerOwner, userIsMember } from "../../db/Server";
 import { getUserById } from "../../db/User";
 
 //TODO:
@@ -33,13 +34,41 @@ export async function requireUser(
   }
 }
 
-// requireAccess -> ensures that the signedin user is a member of a server
+// requireAccess -> ensures that the signedin user is a member of a server, will work with
+// channelId param or serverId param
 export async function requireAcces(
   req: Request,
   res: Response,
   next: NextFunction
 ) {
   try {
+    let serverId = req.params.serverId;
+
+    if (!serverId) {
+      let channelId = req.params.channelId;
+      if (!channelId) {
+        const err: ResponseError = new Error("Could not find resource.");
+        err.status = 404;
+        throw err;
+      }
+      let channel = await getServerByChannelId(channelId);
+      if (channel) {
+        serverId = channel;
+      } else {
+        const err: ResponseError = new Error("Could not find resource.");
+        err.status = 404;
+        throw err;
+      }
+    }
+    const maybeServer = await getServerById(req.params.serverId);
+    if (!maybeServer) {
+      const err: ResponseError = new Error(
+        "Could not find a server with that ID."
+      );
+      err.status = 404;
+      throw err;
+    }
+
     if (req.user) {
       const hasAccess = await userIsMember(req.user.id, req.params.serverId);
       if (hasAccess) {
@@ -73,6 +102,26 @@ export async function requireOwner(
   next: NextFunction
 ) {
   try {
+    let serverID = req.params.serverId;
+
+    if (!serverID) {
+      let channelId = req.params.channelId;
+      if (!channelId) {
+        const err: ResponseError = new Error("Could not find resource.");
+        err.status = 404;
+        throw err;
+      }
+      const maybeServerId = await getServerByChannelId(channelId);
+
+      if (maybeServerId) {
+        serverID = maybeServerId;
+      } else {
+        const err: ResponseError = new Error("Could not find resource.");
+        err.status = 404;
+        throw err;
+      }
+    }
+
     if (req.user) {
       const owner = await getServerOwner(req.params.serverId);
       if (owner) {

@@ -3,7 +3,7 @@ import { Member, Server } from "@prisma/client";
 
 // create server
 
-export async function createServer(
+export async function createNewServer(
   newServer: ServerCreateFields
 ): Promise<Server> {
   const createdServer = await prisma.server.create({

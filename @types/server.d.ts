@@ -1,6 +1,7 @@
 interface ServerCreateFields {
   name: string;
   serverImage?: string;
+  ownerId: string;
 }
 
 interface ServerAllInfo {

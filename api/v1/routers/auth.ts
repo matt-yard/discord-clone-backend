@@ -59,7 +59,6 @@ authRotuer.post(
         res.cookie("access_token", access_token, {
           httpOnly: true,
           sameSite: "strict",
-          secure: true,
         });
 
         res.send({

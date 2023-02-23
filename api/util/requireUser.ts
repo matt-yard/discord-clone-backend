@@ -16,6 +16,7 @@ export async function requireUser(
   try {
     const token: string = req.cookies["access_token"];
 
+    console.log(req.cookies);
     if (!token) {
       const err: ResponseError = new Error("You must sign in first.");
       err.status = 401;

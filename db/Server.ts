@@ -1,5 +1,6 @@
 import prisma from "./index";
 import { Member, Server } from "@prisma/client";
+import { createChannel } from "./Channel";
 
 // create server
 
@@ -16,6 +17,12 @@ export async function createNewServer(
       userId: ownerId,
       isOwner: true,
     },
+  });
+
+  await createChannel({
+    name: "general",
+    type: "text",
+    serverId: createdServer.id,
   });
 
   return createdServer;

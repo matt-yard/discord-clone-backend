@@ -4,6 +4,8 @@ import apiRouter from "./api";
 import cors from "cors";
 import morgan from "morgan";
 import cookieParser from "cookie-parser";
+import { createServer } from "http";
+import { Server, Socket } from "socket.io";
 
 dotenv.config();
 
@@ -22,6 +24,7 @@ app.use("/api", apiRouter);
 
 // Error handling
 
+
 app.use(
   (err: ResponseError, req: Request, res: Response, next: NextFunction) => {
     res.status(err.status || 500);
@@ -37,8 +40,26 @@ app.use(
 
 const PORT = process.env.PORT;
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}!`);
+// app.listen(PORT, () => {
+//   console.log(`Server running on port ${PORT}!`);
+// });
+
+const server = createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: 'http://localhost:5173',
+    methods: ['GET', 'POST'],
+    credentials: true
+  }
 });
+
+io.on('connection', (socket: Socket) => {
+  console.log('SOCKET', socket.id)
+})
+
+server.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}!`)
+})
+
 
 export default app;

@@ -10,6 +10,9 @@ import {
 import prisma from "./index";
 import { addMemberToServer, removeMemberFromServer } from "./Server";
 
+// To seed the DB, just call the main function and run npm run seed
+// this will drop all existing documents and create new ones
+
 async function main(): Promise<void> {
   await prisma.$connect();
 
@@ -23,20 +26,16 @@ async function main(): Promise<void> {
     await prisma.user.deleteMany();
 
     console.log("Creating users...");
-    const newUser: User = await prisma.user.create({
-      data: {
-        username: "matt123",
-        email: "test@mail.com",
-        password: "pass1234",
-      },
+    const newUser: User = await createUser({
+      username: "matt-yard",
+      email: "mattyard11@gmail.com",
+      password: "pass1234",
     });
 
-    const newUser2: User = await prisma.user.create({
-      data: {
-        username: "wittyloc",
-        email: "witty@mail.com",
-        password: "pass1234",
-      },
+    const newUser2: User = await createUser({
+      username: "testUser",
+      email: "test@mail.com",
+      password: "pass1234",
     });
 
     console.log("Successfully created users!");
@@ -44,7 +43,7 @@ async function main(): Promise<void> {
 
     const newServer: Server = await prisma.server.create({
       data: {
-        name: "matts-awesome-server",
+        name: "first-test-server",
       },
     });
 
@@ -54,6 +53,22 @@ async function main(): Promise<void> {
     const newChannel: Channel = await prisma.channel.create({
       data: {
         name: "general",
+        type: "text",
+        serverId: newServer.id,
+      },
+    });
+
+    await prisma.channel.create({
+      data: {
+        name: "video-games",
+        type: "text",
+        serverId: newServer.id,
+      },
+    });
+
+    await prisma.channel.create({
+      data: {
+        name: "coding",
         type: "text",
         serverId: newServer.id,
       },
@@ -239,16 +254,18 @@ async function seed(): Promise<void> {
   // console.log("return value from delete user function: ", deletedUser);
 }
 
-async function test(): Promise<void> {
-  await prisma.server.delete({
-    where: {
-      id: "63f3d7cb2f71da0db74e6666",
-    },
-  });
+// async function test(): Promise<void> {
+//   await prisma.server.delete({
+//     where: {
+//       id: "63f3d7cb2f71da0db74e6666",
+//     },
+//   });
 
-  console.log("deleted...");
-}
+//   console.log("deleted...");
+// }
 
-// main();
+//Run main to seed
+
+main();
 // seed();
-test();
+// test();

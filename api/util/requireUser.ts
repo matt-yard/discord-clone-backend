@@ -61,14 +61,15 @@ export async function requireAcces(
         err.status = 404;
         throw err;
       }
-    }
-    const maybeServer = await getServerById(req.params.serverId);
-    if (!maybeServer) {
-      const err: ResponseError = new Error(
-        "Could not find a server with that ID."
-      );
-      err.status = 404;
-      throw err;
+    } else {
+      const maybeServer = await getServerById(req.params.serverId);
+      if (!maybeServer) {
+        const err: ResponseError = new Error(
+          "Could not find a server with that ID."
+        );
+        err.status = 404;
+        throw err;
+      }
     }
 
     if (req.user?.id) {

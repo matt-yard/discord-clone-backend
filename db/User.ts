@@ -18,7 +18,7 @@ export async function createUser(newUser: UserCreateFields): Promise<User> {
 // getUserForLogin returns the password so that it can be verified by the API on login
 // return value of this function should NEVER be sent to the frontend by the API
 export async function getUserForLogin(email: string): Promise<User | null> {
-  const user: User | null = await prisma.user.findFirst({
+  const user: User | null = await prisma.user.findUnique({
     where: { email: email },
   });
 

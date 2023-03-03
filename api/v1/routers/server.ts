@@ -75,6 +75,12 @@ serverRouter.get(
       const selectedServer: (Server & ServerAllInfo) | null =
         await getServerById(req.params.serverId);
 
+      if (!selectedServer) {
+        const err: ResponseError = new Error("Server not found");
+        err.status = 404;
+        throw err;
+      }
+
       res.send({
         ok: true,
         server: selectedServer,

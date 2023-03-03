@@ -30,7 +30,7 @@ model User {
   serverIds String[] @db.ObjectId
   servers Member[]
   messages Message[]
-  profileImage String @default("none")
+  profileImage String @default("https://simg.nicepng.com/png/small/522-5226533_get-beyond-the-usual-suspects-profile-pic-icon.png")
   createdAt DateTime @default(now())
 }
 
@@ -40,7 +40,7 @@ model Server {
   channels Channel[]
   memberIds String[] @db.ObjectId
   members Member[]
-  serverImage String @default("none")
+  serverImage String @default("https://i.pinimg.com/originals/f3/cf/8a/f3cf8a413e299ecf1451c1a4877b976d.jpg")
 }
 
 model Member {

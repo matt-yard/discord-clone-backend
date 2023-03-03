@@ -81,7 +81,7 @@ export async function validateLogin(
       err.status = 400;
       throw err;
     }
-
+    console.log("The user, ", user);
     if (!user) {
       const err: ResponseError = new Error("Invalid username or password.");
       err.status = 422;

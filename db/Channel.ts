@@ -37,7 +37,7 @@ export async function getChannelById(
   channelId: string
 ): Promise<ChannelWithMessages | null> {
   const selectedChannel: ChannelWithMessages | null =
-    await prisma.channel.findFirst({
+    await prisma.channel.findUnique({
       where: { id: channelId },
       select: {
         id: true,

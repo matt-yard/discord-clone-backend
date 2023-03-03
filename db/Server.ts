@@ -25,28 +25,31 @@ export async function createNewServer(
 export async function getServerById(
   serverId: string
 ): Promise<(Server & ServerAllInfo) | null> {
-  const server: (Server & ServerAllInfo) | null = await prisma.server.findFirst(
-    {
-      where: { id: serverId },
-      include: {
-        members: {
-          include: {
-            user: {
-              select: {
-                id: true,
-                username: true,
-                profileImage: true,
-                createdAt: true,
+  try {
+    const server: (Server & ServerAllInfo) | null =
+      await prisma.server.findUnique({
+        where: { id: serverId },
+        include: {
+          members: {
+            include: {
+              user: {
+                select: {
+                  id: true,
+                  username: true,
+                  profileImage: true,
+                  createdAt: true,
+                },
               },
             },
           },
+          channels: true,
         },
-        channels: true,
-      },
-    }
-  );
+      });
 
-  return server;
+    return server;
+  } catch {
+    return null;
+  }
 }
 
 // update server

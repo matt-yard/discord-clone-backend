@@ -54,7 +54,14 @@ const io = new Server(server, {
 });
 
 io.on('connection', (socket: Socket) => {
-  console.log('SOCKET', socket.id)
+  socket.on("joinedserver", (serverId) => {
+    socket.join(`${serverId}`);
+    socket.to(`${serverId}`).emit("TEST");
+  })
+
+  socket.on('loggedIn', (userID) => {
+    socket.join(`${userID}`)
+  })
 })
 
 server.listen(PORT, () => {

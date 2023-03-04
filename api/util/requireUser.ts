@@ -16,7 +16,7 @@ export async function requireUser(
   try {
     const token: string = req.cookies["access_token"];
 
-    console.log(req.cookies);
+
     if (!token) {
       const err: ResponseError = new Error("You must sign in first.");
       err.status = 401;
@@ -25,7 +25,7 @@ export async function requireUser(
     const SECRET_KEY: jwt.Secret = `${process.env.JWT_SECRET}`;
     const data: string = jwt.verify(token, SECRET_KEY) as string;
 
-    console.log(typeof data);
+
 
     const user = await getUserById(data);
     console.log("user, ", user);
@@ -94,7 +94,7 @@ export async function requirePermission(
   req: Request,
   res: Response,
   next: NextFunction
-) {}
+) { }
 
 //requireOwner -> reserved for actions only a server owner can make,
 // like deleting a server

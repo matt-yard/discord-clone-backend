@@ -180,7 +180,7 @@ serverRouter.post(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { username } = req.body;
-      console.log("username", username);
+
       if (!username) {
         const err: ResponseError = new Error("Must provide a username");
         err.status = 400;

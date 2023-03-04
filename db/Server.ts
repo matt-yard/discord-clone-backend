@@ -157,7 +157,6 @@ export async function userIsMember(
       serverId: serverId,
     },
   });
-  console.log(member);
   let isMember = member !== null;
 
   return isMember;

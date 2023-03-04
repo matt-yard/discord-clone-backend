@@ -58,6 +58,10 @@ io.on('connection', (socket: Socket) => {
     socket.join(`${serverId}`);
     socket.to(`${serverId}`).emit("TEST");
   })
+
+  socket.on('loggedIn', (userID) => {
+    socket.join(`${userID}`)
+  })
 })
 
 server.listen(PORT, () => {
